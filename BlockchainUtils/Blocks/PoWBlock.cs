@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BlockchainUtils.Blocks
 {
-    public class PoWBlock : BlockBase
+    public class PoWBlock : BlockBase, IPoWBlock
     {
         public int Nonce { get; set; } = 0;
 

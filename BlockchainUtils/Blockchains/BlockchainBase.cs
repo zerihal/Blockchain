@@ -6,6 +6,12 @@ namespace BlockchainUtils.Blockchains
     {
         public IList<IBlock> Chain { set; get; }
 
+        /// <summary>
+        /// The difficulty is an integer that indicates the number of leading zeros required for a generated hash - the
+        /// higher the number the more difficult it will be to mine (will require more nonce increments to find a hash)
+        /// </summary>
+        public int Difficulty { set; get; } = 3;
+
         protected BlockchainBase()
         {
             Chain = new List<IBlock>();

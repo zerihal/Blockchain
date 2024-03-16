@@ -19,11 +19,12 @@ namespace BlockchainTestApp
             var sb = new StringBuilder();
 
             sb.AppendLine("Select an action:");
-            sb.AppendLine("1: Run sample test");
-            sb.AppendLine("2: Run sample test 2");
-            sb.AppendLine("3: Run custom test");
-            sb.AppendLine("4: Change hash algorithm");
-            sb.AppendLine("5: Exit");
+            sb.AppendLine("1: Run basic hash test");
+            sb.AppendLine("2: Run PoW test");
+            sb.AppendLine("3: Run transaction test");
+            sb.AppendLine("4: Run custom test");
+            sb.AppendLine("5: Change hash algorithm");
+            sb.AppendLine("6: Exit");
 
             Console.WriteLine(sb.ToString());
         }
@@ -39,7 +40,7 @@ namespace BlockchainTestApp
             switch (selection.KeyChar) 
             {
                 case '1':
-                    runTest = new SampleTest();
+                    runTest = new BasicHashTest();
                     runTest.Run([]);
 
                     // The blockchain should be valid at this point so confirm that now
@@ -78,20 +79,25 @@ namespace BlockchainTestApp
                     break;
 
                 case '2':
-                    runTest = new SampleTest2();
+                    runTest = new PoWTest();
                     runTest.Run([]);
                     break;
 
                 case '3':
-                    runTest = new CustomTest();
+                    runTest = new TransactionTest();
                     runTest.Run([]);
                     break;
 
                 case '4':
-                    var changedHash = ChangeHash();
+                    runTest = new CustomTest();
+                    runTest.Run([]);
                     break;
 
                 case '5':
+                    var changedHash = ChangeHash();
+                    break;
+
+                case '6':
                     runTest = new ExitTest();
                     break;
             }

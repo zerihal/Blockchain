@@ -1,18 +1,12 @@
-﻿using BlockchainUtils;
-using BlockchainUtils.Blockchains;
+﻿using BlockchainUtils.Blockchains;
 using BlockchainUtils.Blocks;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlockchainTestApp.RunTests
 {
-    public class SampleTest2 : RunTestBase
+    public class PoWTest : RunTestBase
     {
-        public override string RunTestName => "Sample Test 2";
+        public override string RunTestName => "PoW Test";
 
         public override void Run(object[] args)
         {

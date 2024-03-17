@@ -10,7 +10,7 @@ namespace BlockchainUtils.Blockchains
         /// The difficulty is an integer that indicates the number of leading zeros required for a generated hash - the
         /// higher the number the more difficult it will be to mine (will require more nonce increments to find a hash)
         /// </summary>
-        public int Difficulty { set; get; } = 3;
+        public int Difficulty => BlockchainSettings.MineDifficulty;
 
         protected BlockchainBase()
         {

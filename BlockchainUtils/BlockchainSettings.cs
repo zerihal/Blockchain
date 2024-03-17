@@ -7,6 +7,8 @@ namespace BlockchainUtils
     /// </summary>
     public static class BlockchainSettings
     {
+        public static int MineDifficulty { get; set; } = 3;
+
         public static HashAlorithmImp BlockchainHashAlgorithm { get; set; }
 
         public static HashAlgorithm CurrentHash

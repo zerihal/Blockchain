@@ -1,6 +1,7 @@
 ﻿using BlockchainTestApp.Interfaces;
 using BlockchainTestApp.RunTests;
 using BlockchainUtils;
+using BlockchainUtils.Validation;
 using System.Text;
 
 namespace BlockchainTestApp
@@ -24,7 +25,8 @@ namespace BlockchainTestApp
             sb.AppendLine("3: Run transaction test");
             sb.AppendLine("4: Run custom test");
             sb.AppendLine("5: Change hash algorithm");
-            sb.AppendLine("6: Exit");
+            sb.AppendLine("6: Change mine difficulty");
+            sb.AppendLine("7: Exit");
 
             Console.WriteLine(sb.ToString());
         }
@@ -49,31 +51,9 @@ namespace BlockchainTestApp
                         Console.WriteLine("Blockchain is valid");
 
                         // Tamper with a Block
-                        #pragma warning disable CS8602 // Dereference of a possibly null reference.
-
-                        Console.WriteLine("Tampering with Block data");
-                        runTest.RunTestBlockchain.Chain[1].Data = "{sender:Device1,receiver:CentralDevice,temperature:35}";
-
-                        // Blockchain should now be invalid
-                        if (!BlockchainHelper.IsValidBlockchain(runTest.RunTestBlockchain, out var invalidBlocks1))
-                        {
-                            Console.WriteLine("Blockchain invalid - invalid blocks:");
-
-                            foreach (var block in invalidBlocks1)
-                                Console.WriteLine($"{block}");
-
-                            Console.WriteLine("Tampering with Block hash for invalid block");
-
-                            runTest.RunTestBlockchain.Chain[1].Hash = runTest.RunTestBlockchain.Chain[3].CalculateHash();
-                            BlockchainHelper.IsValidBlockchain(runTest.RunTestBlockchain, out var invalidBlocks2);
-
-                            Console.WriteLine("Blockchain now has the following invalid blocks:");
-
-                            foreach (var block in invalidBlocks1)
-                                Console.WriteLine($"{block}");
-                        }
-
-                        #pragma warning restore CS8602 // Dereference of a possibly null reference.
+                        #pragma warning disable CS8604 // Possible null reference argument.
+                        TamperValidate.Tamper(runTest.RunTestBlockchain);
+                        #pragma warning restore CS8604 // Possible null reference argument.
                     }
 
                     break;
@@ -98,6 +78,17 @@ namespace BlockchainTestApp
                     break;
 
                 case '6':
+                    Console.WriteLine($"\nCurrent mine difficulty: {BlockchainSettings.MineDifficulty}\nEnter new difficulty:\n");
+                    var difficulty = Console.ReadKey();
+
+                    if (int.TryParse(difficulty.KeyChar.ToString(), out int newDifficulty))
+                        BlockchainSettings.MineDifficulty = newDifficulty;
+
+                    Console.WriteLine($"\nMine difficulty set to: {BlockchainSettings.MineDifficulty}");
+
+                    break;
+
+                case '7':
                     runTest = new ExitTest();
                     break;
             }

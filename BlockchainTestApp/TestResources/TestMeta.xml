@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TestMeta>
+  <Test>
+    <Name>Basic Hash Test</Name>
+    <Description>Creates a very basic blockchain whereby blocks are linked to the previous and next block in the chain by hash.</Description>
+  </Test>
+</TestMeta>

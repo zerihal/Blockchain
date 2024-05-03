@@ -4,12 +4,14 @@ namespace BlockchainTestApp.Interfaces
 {
     public interface IRunTest
     {
-        public string RunTestName { get; }
+        string RunTestName { get; }
 
-        public RunAction RunAction { get; }
+        RunAction RunAction { get; }
 
         BlockchainBase? RunTestBlockchain { get; }
 
-        public void Run(object[] args);
+        string Description { get; }
+
+        void Run(object[] args);
     }
 }

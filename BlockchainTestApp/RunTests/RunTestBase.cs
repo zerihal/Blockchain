@@ -11,6 +11,8 @@ namespace BlockchainTestApp.RunTests
 
         public BlockchainBase? RunTestBlockchain { get; protected set; }
 
+        public virtual string Description => TestUtils.GetDescription(RunTestName);
+
         public abstract void Run(object[] args);
     }
 }

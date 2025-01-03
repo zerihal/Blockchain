@@ -3,6 +3,9 @@ using System.Text;
 
 namespace BlockchainUtils.Blocks
 {
+    /// <summary>
+    /// Basic hash linked block, immutably linked to the previous block in the blockchain.
+    /// </summary>
     public class BasicBlock : BlockBase
     {
         public BasicBlock(DateTime timeStamp, string? previousHash, string data)
@@ -14,6 +17,11 @@ namespace BlockchainUtils.Blocks
             Hash = CalculateHash();
         }
 
+        /// <summary>
+        /// Calculates the hash based on the previous block in the chain (if present), using its timestamp,
+        /// hash, and data.
+        /// </summary>
+        /// <returns>Calculated hash as string.</returns>
         public override string CalculateHash()
         {
             HashAlgorithm sha = BlockchainSettings.CurrentHash;

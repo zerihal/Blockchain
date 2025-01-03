@@ -4,6 +4,9 @@ using Newtonsoft.Json;
 
 namespace BlockchainTestApp.RunTests
 {
+    /// <summary>
+    /// Basic blockchain test.
+    /// </summary>
     public class BasicHashTest : RunTestBase
     {
         public override string RunTestName => "Basic Hash Test";

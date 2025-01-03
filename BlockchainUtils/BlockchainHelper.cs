@@ -4,6 +4,13 @@ namespace BlockchainUtils
 {
     public static class BlockchainHelper
     {
+        /// <summary>
+        /// Checks whether the blockchain is valid (blocks have not been modified or substituted).
+        /// </summary>
+        /// <param name="blockchain">The blockchain to validate.</param>
+        /// <param name="invalidBlocks">List of invalid blocks (if any) by index.</param>
+        /// <returns>True if the blockchain is valid (no tampering), otherwise false.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if blockchain arg is null.</exception>
         public static bool IsValidBlockchain(BlockchainBase? blockchain, out IList<int>invalidBlocks)
         {
             invalidBlocks = new List<int>();

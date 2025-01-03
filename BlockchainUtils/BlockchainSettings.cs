@@ -7,10 +7,19 @@ namespace BlockchainUtils
     /// </summary>
     public static class BlockchainSettings
     {
+        /// <summary>
+        /// Mining difficulty for PoW and transaction blocks.
+        /// </summary>
         public static int MineDifficulty { get; set; } = 3;
 
+        /// <summary>
+        /// Blockchain hash algorithm.
+        /// </summary>
         public static HashAlorithmImp BlockchainHashAlgorithm { get; set; }
 
+        /// <summary>
+        /// Currently set hash algorithm.
+        /// </summary>
         public static HashAlgorithm CurrentHash
         {
             get

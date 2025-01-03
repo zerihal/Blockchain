@@ -1,5 +1,8 @@
 ﻿namespace BlockchainTestApp.RunTests
 {
+    /// <summary>
+    /// Custom test (not yet implemented).
+    /// </summary>
     public class CustomTest : RunTestBase
     {
         public override string RunTestName => "Custom Test";

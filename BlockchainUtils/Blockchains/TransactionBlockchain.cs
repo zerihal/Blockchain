@@ -5,7 +5,7 @@ namespace BlockchainUtils.Blockchains
 {
     public class TransactionBlockchain : BlockchainBase
     {
-        private IList<Transaction> PendingTransactions = new List<Transaction>();
+        public IList<Transaction> PendingTransactions = new List<Transaction>();
 
         public int Reward { get; set; } = 1;
 

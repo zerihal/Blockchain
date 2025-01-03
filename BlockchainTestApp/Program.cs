@@ -24,9 +24,10 @@ namespace BlockchainTestApp
             sb.AppendLine("2: Run PoW test");
             sb.AppendLine("3: Run transaction test");
             sb.AppendLine("4: Run custom test");
-            sb.AppendLine("5: Change hash algorithm");
-            sb.AppendLine("6: Change mine difficulty");
-            sb.AppendLine("7: Exit");
+            sb.AppendLine("5: Run P2P test");
+            sb.AppendLine("6: Change hash algorithm");
+            sb.AppendLine("7: Change mine difficulty");
+            sb.AppendLine("8: Exit");
 
             Console.WriteLine(sb.ToString());
         }
@@ -74,10 +75,14 @@ namespace BlockchainTestApp
                     break;
 
                 case '5':
-                    var changedHash = ChangeHash();
+                    // Not yet implemented
                     break;
 
                 case '6':
+                    var changedHash = ChangeHash();
+                    break;
+
+                case '7':
                     Console.WriteLine($"\nCurrent mine difficulty: {BlockchainSettings.MineDifficulty}\nEnter new difficulty:\n");
                     var difficulty = Console.ReadKey();
 
@@ -88,7 +93,7 @@ namespace BlockchainTestApp
 
                     break;
 
-                case '7':
+                case '8':
                     runTest = new ExitTest();
                     break;
             }

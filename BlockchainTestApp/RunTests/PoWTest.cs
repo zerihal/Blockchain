@@ -4,6 +4,9 @@ using Newtonsoft.Json;
 
 namespace BlockchainTestApp.RunTests
 {
+    /// <summary>
+    /// Proof of Work blockchain test.
+    /// </summary>
     public class PoWTest : RunTestBase
     {
         public override string RunTestName => "PoW Test";

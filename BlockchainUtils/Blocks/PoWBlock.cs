@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace BlockchainUtils.Blocks
 {
+    /// <summary>
+    /// Proof of Work block - the hash of the previous block must be found (or mined) in order for a new block to be added, 
+    /// which will may take a considerable amount of processing time depending on the difficulty set for the blockchain.
+    /// </summary>
     public class PoWBlock : BlockBase, IPoWBlock
     {
+        /// <inheritdoc/>
         public int Nonce { get; set; } = 0;
 
         public PoWBlock(DateTime timeStamp, string? previousHash, string data)
@@ -20,6 +21,7 @@ namespace BlockchainUtils.Blocks
             Hash = CalculateHash();
         }
 
+        /// <inheritdoc/>
         public override string CalculateHash()
         {
             HashAlgorithm sha = BlockchainSettings.CurrentHash;
@@ -30,6 +32,7 @@ namespace BlockchainUtils.Blocks
             return Convert.ToBase64String(outputBytes);
         }
 
+        /// <inheritdoc/>
         public void Mine(int difficulty)
         {
             var leadingZeros = new string('0', difficulty);

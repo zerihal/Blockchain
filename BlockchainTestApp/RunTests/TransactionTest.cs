@@ -22,7 +22,7 @@ namespace BlockchainTestApp.RunTests
         {
             var startTime = DateTime.Now;
 
-            TransactionBlockchain RunTestBlockchain = new TransactionBlockchain();
+            TransactionBlockchain RunTestBlockchain = new TransactionBlockchain(true);
             RunTestBlockchain.CreateTransaction(new Transaction("ZS", "NN", 10));
             RunTestBlockchain.ProcessPendingTransactions("JD");
 

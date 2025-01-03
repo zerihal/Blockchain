@@ -1,5 +1,6 @@
 ﻿using BlockchainUtils.Blocks;
 using BlockchainUtils.Transactions;
+using Newtonsoft.Json;
 
 namespace BlockchainUtils.Blockchains
 {
@@ -9,7 +10,12 @@ namespace BlockchainUtils.Blockchains
 
         public int Reward { get; set; } = 1;
 
-        public TransactionBlockchain() : base() { }
+        public TransactionBlockchain(bool init) : base() { }
+
+        public TransactionBlockchain()
+        {
+            Chain = new List<IBlock>();
+        }
 
         public void CreateTransaction(Transaction transaction) => PendingTransactions.Add(transaction);
 

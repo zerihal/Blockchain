@@ -1,54 +1,37 @@
-﻿using BlockchainUtils;
-using BlockchainUtils.Blockchains;
-using BlockchainUtils.Transactions;
-using Newtonsoft.Json;
-using WebSocketSharp;
-using WebSocketSharp.Server;
+﻿using WebSocketSharp.Server;
 
 namespace BlockchainNetworkP2P.Server
 {
     public class P2PServer : WebSocketBehavior
     {
-        bool chainSynched = false;
-        WebSocketServer? wss = null;
+        private const string _address = "ws://localhost";
+        private const string _socketService = "/Blockchain";
+        private WebSocketServer? wss = null;
+
+        public string ServerAddress { get; private set; } = string.Empty;
+
+        public string SocketServiceAddress { get; private set; } = string.Empty;
 
         public void Start(int port)
         {
-            // ToDo: To test this we need to create an instance of client and server, start, and then add some transactions, etc
+            ServerAddress = $"{_address}:{port}";
+            SocketServiceAddress = $"{ServerAddress}{_socketService}";
 
-            wss = new WebSocketServer($"ws://127.0.0.1:{port}");
-            wss.AddWebSocketService<P2PServer>("/Blockchain");
+            wss = new WebSocketServer(ServerAddress);
+            wss.AddWebSocketService<BlockchainBehaviour>(_socketService);
             wss.Start();
-            Console.WriteLine($"Started server at ws://127.0.0.1:{port}");
+            Console.WriteLine($"Started server at {ServerAddress}");
         }
 
-        protected override void OnMessage(MessageEventArgs e)
+        public void Stop() => wss?.Stop();
+
+        // Example of a broadcast message to all clients ...
+        public void SendTestMessage()
         {
-            if (e.Data == "Hi Server")
+            if (wss != null)
             {
-                Console.WriteLine(e.Data);
-                Send("Hi Client");
-            }
-            else
-            {
-                TransactionBlockchain? newChain = JsonConvert.DeserializeObject<TransactionBlockchain>(e.Data);
-
-                if (newChain != null && BlockchainHelper.IsValidBlockchain(newChain, out _) && 
-                    newChain.Chain.Count > Sandbox.SampleTransactionBlockchain.Chain.Count)
-                {
-                    var newTransactions = new List<Transaction>();
-                    newTransactions.AddRange(newChain.PendingTransactions);
-                    newTransactions.AddRange(Sandbox.SampleTransactionBlockchain.PendingTransactions);
-
-                    newChain.PendingTransactions = newTransactions;
-                    Sandbox.SampleTransactionBlockchain = newChain;
-                }
-
-                if (!chainSynched)
-                {
-                    Send(JsonConvert.SerializeObject(Sandbox.SampleTransactionBlockchain));
-                    chainSynched = true;
-                }
+                foreach (var host in wss.WebSocketServices.Hosts)
+                    host.Sessions.Broadcast(Sandbox.Test);
             }
         }
     }

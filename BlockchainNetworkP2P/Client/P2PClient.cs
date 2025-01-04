@@ -1,7 +1,6 @@
 ﻿using BlockchainUtils;
 using BlockchainUtils.Blockchains;
 using BlockchainUtils.Transactions;
-using Newtonsoft.Json;
 using WebSocketSharp;
 
 namespace BlockchainNetworkP2P.Client
@@ -28,38 +27,37 @@ namespace BlockchainNetworkP2P.Client
 
                 ws.OnMessage += (sender, e) =>
                 {
-                    if (e.Data == Sandbox.ClientHello)
-                    {
-                        Console.WriteLine($"{ClientName} received messasge {e.Data}");
-                        ws.Send(JsonConvert.SerializeObject(Sandbox.SampleTransactionBlockchain, Sandbox.JsonSettings));
-                    }
-                    else if (e.Data == Sandbox.Test)
-                    {
-                        Console.WriteLine($"{ClientName} received messasge {e.Data}");
-                    }
-                    else
-                    {
-                        var newChain = JsonConvert.DeserializeObject<TransactionBlockchain>(e.Data, Sandbox.JsonSettings);
+                    var deserializedMsg = MessageHelper.DeserializeMessage(e.Data, out _);
 
-                        // If the blockchain that has been received is valid and has more blocks than the sample one, update
-                        // the sample blockchain.
-                        if (newChain != null && BlockchainHelper.IsValidBlockchain(newChain, out _) &&
-                            newChain.Chain.Count > Sandbox.SampleTransactionBlockchain.Chain.Count)
-                        {
-                            var newTransactions = new List<Transaction>();
-                            newTransactions.AddRange(newChain.PendingTransactions);
-                            newTransactions.AddRange(Sandbox.SampleTransactionBlockchain.PendingTransactions);
+                    switch (deserializedMsg)
+                    {
+                        case string str:
+                            Console.WriteLine($"{ClientName} received messasge {str}");
+                            if (str == MessageHelper.ClientHello)
+                                ws.Send(MessageHelper.SerializeMessage(Sandbox.SampleTransactionBlockchain));
+                            break;
 
-                            newChain.PendingTransactions = newTransactions;
-                            Sandbox.SampleTransactionBlockchain = newChain;
-                        }
+                        case TransactionBlockchain tBlockchain:
+                            // If the blockchain that has been received is valid and has more blocks than the sample one, update
+                            // the sample blockchain.
+                            if (tBlockchain != null && BlockchainHelper.IsValidBlockchain(tBlockchain, out _) &&
+                                tBlockchain.Chain.Count > Sandbox.SampleTransactionBlockchain.Chain.Count)
+                            {
+                                var newTransactions = new List<Transaction>();
+                                newTransactions.AddRange(tBlockchain.PendingTransactions);
+                                newTransactions.AddRange(Sandbox.SampleTransactionBlockchain.PendingTransactions);
+
+                                tBlockchain.PendingTransactions = newTransactions;
+                                Sandbox.SampleTransactionBlockchain = tBlockchain;
+                            }
+                            break;
                     }
                 };
 
                 ws.OnOpen += (sender, e) =>
                 {
                     Console.WriteLine($"{ClientName} connected to {url}");
-                    ws.Send(Sandbox.ServerHello);
+                    ws.Send(MessageHelper.SerializeMessage(MessageHelper.ServerHello));
                 };
 
                 ws.OnError += (sender, e) =>
@@ -93,10 +91,12 @@ namespace BlockchainNetworkP2P.Client
             }
         }
 
+        // ToDo - need to add some bits to this test - could send transaction to the server (would need to handle on message received), 
+        // which could then broadcast that there are pending transactions that can be processed maybe?
         public void AddTransaction(string toAddress, int amount)
         {
             var transaction = new Transaction(ClientName, toAddress, amount);
-            Send(wsDict.First().Key, JsonConvert.SerializeObject(transaction));
+            Send(wsDict.First().Key, MessageHelper.SerializeMessage(transaction));
         }
 
         public void Send(string url, string data)

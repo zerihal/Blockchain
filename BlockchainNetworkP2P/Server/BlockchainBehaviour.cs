@@ -1,44 +1,50 @@
 ﻿using BlockchainUtils;
 using BlockchainUtils.Blockchains;
 using BlockchainUtils.Transactions;
-using Newtonsoft.Json;
 using WebSocketSharp;
 using WebSocketSharp.Server;
 
 namespace BlockchainNetworkP2P.Server
 {
+    // *** THIS CLASS IS TO BE DELETED - MOVED JUST TO P2PSERVER FOR SIMPLICITY ***
     public class BlockchainBehaviour : WebSocketBehavior
     {
         bool chainSynched = false;
 
         protected override void OnMessage(MessageEventArgs e)
         {
-            Console.WriteLine($"Server received message: {e.Data}");
-            if (e.Data == Sandbox.ServerHello)
+            var deserializedMsg = MessageHelper.DeserializeMessage(e.Data, out var msgJsonData);
+
+            Console.WriteLine($"Server received message: {msgJsonData}");
+
+            switch (deserializedMsg)
             {
-                Console.WriteLine(e.Data);
-                Send(Sandbox.ClientHello);
-            }
-            else
-            {
-                TransactionBlockchain? newChain = JsonConvert.DeserializeObject<TransactionBlockchain>(e.Data, Sandbox.JsonSettings);
+                case string str:
+                    if (str == MessageHelper.ServerHello)
+                        Send(MessageHelper.SerializeMessage(MessageHelper.ClientHello));
+                    break;
 
-                if (newChain != null && BlockchainHelper.IsValidBlockchain(newChain, out _) &&
-                    newChain.Chain.Count > Sandbox.SampleTransactionBlockchain.Chain.Count)
-                {
-                    var newTransactions = new List<Transaction>();
-                    newTransactions.AddRange(newChain.PendingTransactions);
-                    newTransactions.AddRange(Sandbox.SampleTransactionBlockchain.PendingTransactions);
+                case TransactionBlockchain tBlockchain:
+                    // If the blockchain that has been received is valid and has more blocks than the sample one, update
+                    // the sample blockchain.
+                    if (tBlockchain != null && BlockchainHelper.IsValidBlockchain(tBlockchain, out _) &&
+                        tBlockchain.Chain.Count > Sandbox.SampleTransactionBlockchain.Chain.Count)
+                    {
+                        var newTransactions = new List<Transaction>();
+                        newTransactions.AddRange(tBlockchain.PendingTransactions);
+                        newTransactions.AddRange(Sandbox.SampleTransactionBlockchain.PendingTransactions);
 
-                    newChain.PendingTransactions = newTransactions;
-                    Sandbox.SampleTransactionBlockchain = newChain;
-                }
+                        tBlockchain.PendingTransactions = newTransactions;
+                        Sandbox.SampleTransactionBlockchain = tBlockchain;
+                    }
 
-                if (!chainSynched)
-                {
-                    Send(JsonConvert.SerializeObject(Sandbox.SampleTransactionBlockchain, Sandbox.JsonSettings));
-                    chainSynched = true;
-                }
+                    if (!chainSynched)
+                    {
+                        Send(MessageHelper.SerializeMessage(Sandbox.SampleTransactionBlockchain));
+                        chainSynched = true;
+                    }
+
+                    break;
             }
         }
 

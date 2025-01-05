@@ -77,17 +77,9 @@ namespace BlockchainTestApp
                     break;
 
                 case '5':
-                    var server = new P2PServer();
-                    server.Start(8080);
-                    var status = server.State;
+                    runTest = new P2PTransactionTest();
+                    runTest.Run([]);
 
-                    var client1 = new P2PClient("Client1");
-                    client1.Connect(server.SocketServiceAddress);
-
-                    var client2 = new P2PClient("Client2");
-                    client2.Connect(server.SocketServiceAddress);
-
-                    server.SendTestMessage();
                     break;
 
                 case '6':

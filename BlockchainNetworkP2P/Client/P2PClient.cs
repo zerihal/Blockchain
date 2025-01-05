@@ -19,7 +19,7 @@ namespace BlockchainNetworkP2P.Client
             ClientName = clientName;
         }
 
-        public void Connect(string url)
+        public void Connect(string url, bool syncBlockchain = true)
         {
             if (!wsDict.ContainsKey(url))
             {
@@ -32,7 +32,7 @@ namespace BlockchainNetworkP2P.Client
                     switch (deserializedMsg)
                     {
                         case string str:
-                            Console.WriteLine($"{ClientName} received messasge {str}");
+                            Console.WriteLine($"{ClientName} received message {str}");
                             if (str == MessageHelper.ClientHello)
                                 ws.Send(MessageHelper.SerializeMessage(Sandbox.SampleTransactionBlockchain));
                             break;
@@ -52,22 +52,26 @@ namespace BlockchainNetworkP2P.Client
                             }
                             break;
                     }
+
+                    Sandbox.P2PMessagesProcessedCount++;
                 };
 
                 ws.OnOpen += (sender, e) =>
                 {
                     Console.WriteLine($"{ClientName} connected to {url}");
-                    ws.Send(MessageHelper.SerializeMessage(MessageHelper.ServerHello));
+
+                    if (syncBlockchain)
+                        ws.Send(MessageHelper.SerializeMessage(MessageHelper.ServerHello));
                 };
 
                 ws.OnError += (sender, e) =>
                 {
-                    Console.WriteLine($"WebSocket error: {e.Message}");
+                    Console.WriteLine($"WebSocket error ({ClientName}): {e.Message}");
                 };
 
                 ws.OnClose += (sender, e) =>
                 {
-                    Console.WriteLine($"Connection closed: {e.Reason}");
+                    Console.WriteLine($"Connection closed ({ClientName}): {e.Reason}");
                 };
 
                 try
@@ -97,6 +101,11 @@ namespace BlockchainNetworkP2P.Client
         {
             var transaction = new Transaction(ClientName, toAddress, amount);
             Send(wsDict.First().Key, MessageHelper.SerializeMessage(transaction));
+        }
+
+        public void SendTextMessage()
+        {
+            Send(wsDict.First().Key, MessageHelper.SerializeMessage(Sandbox.SampleTransactionBlockchain));
         }
 
         public void Send(string url, string data)

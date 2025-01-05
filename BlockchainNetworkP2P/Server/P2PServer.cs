@@ -10,8 +10,8 @@ namespace BlockchainNetworkP2P.Server
     {
         private const string _address = "ws://localhost";
         private const string _socketService = "/Blockchain";
-        private WebSocketServer? wss = null;
-        private bool chainSynched = false;
+        private WebSocketServer? _wss = null;
+        private bool _chainSynced = false;
 
         public string ServerAddress { get; private set; } = string.Empty;
 
@@ -22,20 +22,25 @@ namespace BlockchainNetworkP2P.Server
             ServerAddress = $"{_address}:{port}";
             SocketServiceAddress = $"{ServerAddress}{_socketService}";
 
-            wss = new WebSocketServer(ServerAddress);
-            wss.AddWebSocketService<P2PServer>(_socketService);
-            wss.Start();
+            _wss = new WebSocketServer(ServerAddress);
+            _wss.AddWebSocketService<P2PServer>(_socketService);
+            _wss.Start();
             Console.WriteLine($"Started server at {ServerAddress}");
         }
 
-        public void Stop() => wss?.Stop();
+        /// <summary>
+        /// Stop the server and all incoming requests and closes all connections.
+        /// </summary>
+        public void Stop() => _wss?.Stop(CloseStatusCode.Normal, "Server stopped");
 
-        // Example of a broadcast message to all clients ...
-        public void SendTestMessage()
+        /// <summary>
+        /// Broadcast a test message to all clients.
+        /// </summary>
+        public void BroadcastTestMessage()
         {
-            if (wss != null)
+            if (_wss != null)
             {
-                foreach (var host in wss.WebSocketServices.Hosts)
+                foreach (var host in _wss.WebSocketServices.Hosts)
                     host.Sessions.Broadcast(MessageHelper.SerializeMessage(MessageHelper.Test));
             }
         }
@@ -67,14 +72,17 @@ namespace BlockchainNetworkP2P.Server
                         Sandbox.SampleTransactionBlockchain = tBlockchain;
                     }
 
-                    if (!chainSynched)
+                    if (!_chainSynced)
                     {
                         Send(MessageHelper.SerializeMessage(Sandbox.SampleTransactionBlockchain));
-                        chainSynched = true;
+                        _chainSynced = true;
+                        Console.WriteLine($"Blockchain synchronised for session {ID}");
                     }
 
                     break;
             }
+
+            Sandbox.P2PMessagesProcessedCount++;
         }
 
         protected override void OnOpen()
@@ -86,6 +94,5 @@ namespace BlockchainNetworkP2P.Server
         {
             Console.WriteLine("Websocket session closed");
         }
-
     }
 }

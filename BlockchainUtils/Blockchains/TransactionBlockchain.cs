@@ -10,7 +10,15 @@ namespace BlockchainUtils.Blockchains
 
         public int Reward { get; set; } = 1;
 
-        public TransactionBlockchain(bool init) : base() { }
+        public bool Initialised { get; private set; } = false;
+
+        public TransactionBlockchain(bool init) : base() 
+        {
+            if (!init)
+                Chain.Clear();
+
+            Initialised = init;
+        }
 
         public TransactionBlockchain()
         {

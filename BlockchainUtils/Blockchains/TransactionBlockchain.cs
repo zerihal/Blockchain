@@ -5,12 +5,26 @@ namespace BlockchainUtils.Blockchains
 {
     public class TransactionBlockchain : BlockchainBase
     {
+        /// <summary>
+        /// List of pending transactions that are due to be added to the blockchain but not yet processed 
+        /// and added as a new block.
+        /// </summary>
         public IList<Transaction> PendingTransactions = new List<Transaction>();
 
+        /// <summary>
+        /// Reward for processing pending transactions to create a new transaction block and add to the chain.
+        /// </summary>
         public int Reward { get; set; } = 1;
 
+        /// <summary>
+        /// Flag to indicate whether the blockchain has been initialised by adding a genesis block.
+        /// </summary>
         public bool Initialised { get; private set; } = false;
 
+        /// <summary>
+        /// Constructor to be used for normal operation with init set to true to create a genesis block.
+        /// </summary>
+        /// <param name="init">True to initializes the blockchain or false to create with empty chain.</param>
         public TransactionBlockchain(bool init) : base() 
         {
             if (!init)
@@ -19,6 +33,9 @@ namespace BlockchainUtils.Blockchains
             Initialised = init;
         }
 
+        /// <summary>
+        /// Default constructor for deserialization (no genesis block added to the chain).
+        /// </summary>
         public TransactionBlockchain()
         {
             Chain = new List<IBlock>();
@@ -66,6 +83,11 @@ namespace BlockchainUtils.Blockchains
             return false;
         }
 
+        /// <summary>
+        /// Gets the balance of a given miner from all transaction blocks within the chain.
+        /// </summary>
+        /// <param name="minerAddress">Miner address to obtain balance for.</param>
+        /// <returns>Total balance within the blockchain for the specified miner.</returns>
         public int GetBalance(string minerAddress)
         {
             var balance = 0;
@@ -85,8 +107,10 @@ namespace BlockchainUtils.Blockchains
             return balance;
         }
 
+        /// <inheritdoc/>
         public override IBlock CreateGenesisBlock() => new TransactionBlock(DateTime.Now, null, PendingTransactions);
 
+        /// <inheritdoc/>
         public override void AddBlock(IBlock block)
         {
             TransactionBlock? latestBlock = GetLatestBlock() as TransactionBlock;

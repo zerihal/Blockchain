@@ -6,6 +6,10 @@ namespace BlockchainNetworkP2P
 {
     internal class BlockchainUtils
     {
+        /// <summary>
+        /// Updates the sample blockchain with the one specified if more recent (chain is longer).
+        /// </summary>
+        /// <param name="tBlockchain">Blockchain to use to potentially update sample blockchain.</param>
         internal void UpdateSampleBlockchain(TransactionBlockchain tBlockchain)
         {
             // If the blockchain that has been received is valid and has more blocks than the sample one, update

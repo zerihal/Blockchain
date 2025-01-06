@@ -6,8 +6,10 @@ namespace BlockchainUtils.Blockchains
     {
         public PoWBlockchain() : base() { }
 
+        /// <inheritdoc/>
         public override IBlock CreateGenesisBlock() => new PoWBlock(DateTime.Now, null, "{}");
 
+        /// <inheritdoc/>
         public override void AddBlock(IBlock block)
         {
             PoWBlock? latestBlock = GetLatestBlock() as PoWBlock;

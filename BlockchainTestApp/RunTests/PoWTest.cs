@@ -9,9 +9,11 @@ namespace BlockchainTestApp.RunTests
     /// </summary>
     public class PoWTest : RunTestBase
     {
+        /// <inheritdoc/>
         public override string RunTestName => "PoW Test";
 
-        public override void Run(object[] args)
+        /// <inheritdoc/>
+        public override void Run(object[]? args)
         {
             var startTime = DateTime.Now;
 

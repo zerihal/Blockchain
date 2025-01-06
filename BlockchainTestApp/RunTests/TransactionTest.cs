@@ -16,9 +16,11 @@ namespace BlockchainTestApp.RunTests
     /// </summary>
     public class TransactionTest : RunTestBase
     {
+        /// <inheritdoc/>
         public override string RunTestName => "Transaction Test";
 
-        public override void Run(object[] args)
+        /// <inheritdoc/>
+        public override void Run(object[]? args)
         {
             var startTime = DateTime.Now;
 

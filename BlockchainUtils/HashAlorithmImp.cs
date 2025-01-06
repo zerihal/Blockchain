@@ -1,5 +1,8 @@
 ﻿namespace BlockchainUtils
 {
+    /// <summary>
+    /// Has algorithim implementation.
+    /// </summary>
     public enum HashAlorithmImp
     {
         SHA256,

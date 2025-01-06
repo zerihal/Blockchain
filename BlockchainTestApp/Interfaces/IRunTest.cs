@@ -26,6 +26,6 @@ namespace BlockchainTestApp.Interfaces
         /// Runs the test.
         /// </summary>
         /// <param name="args">Test arguments.</param>
-        public void Run(object[] args);
+        public void Run(object[]? args = null);
     }
 }

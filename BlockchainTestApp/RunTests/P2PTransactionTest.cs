@@ -2,7 +2,6 @@
 using BlockchainNetworkP2P.Client;
 using BlockchainNetworkP2P.Server;
 using BlockchainUtils.Blockchains;
-using Newtonsoft.Json;
 
 namespace BlockchainTestApp.RunTests
 {
@@ -19,9 +18,11 @@ namespace BlockchainTestApp.RunTests
         private IList<P2PClient> _clients;
         #pragma warning restore CS8618
 
+        /// <inheritdoc/>
         public override string RunTestName => "P2P Transaction Sync Test";
 
-        public override void Run(object[] args)
+        /// <inheritdoc/>
+        public override void Run(object[]? args)
         {
             Console.WriteLine("Creating P2P server and clients");
 
@@ -58,6 +59,9 @@ namespace BlockchainTestApp.RunTests
             Console.WriteLine("\n");
         }
 
+        /// <summary>
+        /// Runs P2P test as an async task.
+        /// </summary>
         private async Task RunP2PTest()
         {
             // Connect and sync the P2P clients and server
@@ -74,18 +78,30 @@ namespace BlockchainTestApp.RunTests
             await Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Runs P2P broadcast test as an async task.
+        /// </summary>
         private async Task RunBroadcastTest()
         {
             _server.BroadcastTestMessage();
             await Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Runs a test monitor that can be awaited until the expected number of P2P messages have been 
+        /// processed.
+        /// </summary>
+        /// <param name="awaitMsgCount">Expected message count that test can wait for.</param>
         private async Task TestMonitor(int awaitMsgCount)
         {
             while (GetProcessedMessages() < awaitMsgCount)
                 await Task.Delay(10);
         }
 
+        /// <summary>
+        /// Gets the total number of processed messages from the P2P server and all clients.
+        /// </summary>
+        /// <returns>Processed message count.</returns>
         private int GetProcessedMessages()
         {
             var processedMessages = Sandbox.ServerMessagesProcessed;
@@ -96,6 +112,9 @@ namespace BlockchainTestApp.RunTests
             return processedMessages;
         }
 
+        /// <summary>
+        /// Resets the processed message count to 0 for the P2P server and all clients.
+        /// </summary>
         private void ResetProcessedMessages()
         {
             Sandbox.ServerMessagesProcessed = 0;
@@ -104,6 +123,9 @@ namespace BlockchainTestApp.RunTests
                 client.MessagesProcessed = 0;
         }
 
+        /// <summary>
+        /// Test cleanup - stop the server and reset the sample transaction blockchain.
+        /// </summary>
         private void Cleanup()
         {
             _server.Stop();

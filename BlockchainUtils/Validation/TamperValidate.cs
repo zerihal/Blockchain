@@ -4,6 +4,11 @@ namespace BlockchainUtils.Validation
 {
     public static class TamperValidate
     {
+        /// <summary>
+        /// Tampers with the blockchain by tampering with the data and hash, checking that validation fails
+        /// and outputting actions / results to console.
+        /// </summary>
+        /// <param name="blockchain"></param>
         public static void Tamper(BlockchainBase blockchain)
         {
             var tamperBlock = GetRandomBlock(blockchain);
@@ -32,6 +37,12 @@ namespace BlockchainUtils.Validation
             }
         }
 
+        /// <summary>
+        /// Gets a random block from the blockchain, with option to exclude block at a specified index.
+        /// </summary>
+        /// <param name="blockchain">The blockchain to obtain a random block from.</param>
+        /// <param name="excludeBlock">Optional index of block to exclude.</param>
+        /// <returns>A random block from the blockchain.</returns>
         private static int GetRandomBlock(BlockchainBase blockchain, int? excludeBlock = null)
         {
             var blocks = blockchain.Chain.Count() - 1;

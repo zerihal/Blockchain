@@ -15,6 +15,6 @@ namespace BlockchainTestApp.RunTests
         public BlockchainBase? RunTestBlockchain { get; protected set; }
 
         /// <inheritdoc/>
-        public abstract void Run(object[] args);
+        public abstract void Run(object[]? args);
     }
 }

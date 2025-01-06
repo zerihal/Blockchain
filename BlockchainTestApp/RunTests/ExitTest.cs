@@ -9,13 +9,16 @@ namespace BlockchainTestApp.RunTests
 {
     public class ExitTest : RunTestBase
     {
+        /// <inheritdoc/>
         public override string RunTestName => "Run and Exit Test";
 
+        /// <inheritdoc/>
         public override RunAction RunAction => RunAction.Exit;
 
-        public override void Run(object[] args)
+        /// <inheritdoc/>
+        public override void Run(object[]? args)
         {
-            if (args.Length > 0)
+            if (args?.Length > 0)
             {
                 IRunTest? rt = null;
                 var addArgs = new List<object>();

@@ -1,20 +1,22 @@
-﻿using BlockchainUtils;
-using BlockchainUtils.Blockchains;
+﻿using BlockchainUtils.Blockchains;
 using BlockchainUtils.Transactions;
 using WebSocketSharp;
 
 namespace BlockchainNetworkP2P.Client
 {
-    /// <summary>
-    /// See https://www.c-sharpcorner.com/article/building-a-blockchain-in-net-core-p2p-network/ for details.
-    /// </summary>
     public class P2PClient
     {
         private IDictionary<string, WebSocket> wsDict = new Dictionary<string, WebSocket>();
         private BlockchainUtils utils = new BlockchainUtils();
 
+        /// <summary>
+        /// Client name.
+        /// </summary>
         public string ClientName { get; }
 
+        /// <summary>
+        /// Number of messages processed by this client.
+        /// </summary>
         public int MessagesProcessed { get; set; }
 
         public P2PClient(string clientName)
@@ -22,6 +24,12 @@ namespace BlockchainNetworkP2P.Client
             ClientName = clientName;
         }
 
+        /// <summary>
+        /// Connects to the P2P server at the specified URL, adding its websocket to the client cache, and
+        /// hooks up events for that websocket. Optionally synchronizes the blockchain with the server.
+        /// </summary>
+        /// <param name="url">Server URL.</param>
+        /// <param name="syncBlockchain">Optionally sync blockchain with the server (default is true).</param>
         public void Connect(string url, bool syncBlockchain = true)
         {
             if (!wsDict.ContainsKey(url))
@@ -93,19 +101,22 @@ namespace BlockchainNetworkP2P.Client
             }
         }
 
-        // ToDo - need to add some bits to this test - could send transaction to the server (would need to handle on message received), 
-        // which could then broadcast that there are pending transactions that can be processed maybe?
+        /// <summary>
+        /// Adds a transaction from this client and sends to the P2P server for processing.
+        /// </summary>
+        /// <param name="toAddress">Recipient of the transaction value.</param>
+        /// <param name="amount">Amount of the transaction.</param>
         public void AddTransaction(string toAddress, int amount)
         {
             var transaction = new Transaction(ClientName, toAddress, amount);
             Send(wsDict.First().Key, MessageHelper.SerializeMessage(transaction));
         }
 
-        public void SendTextMessage()
-        {
-            Send(wsDict.First().Key, MessageHelper.SerializeMessage(Sandbox.SampleTransactionBlockchain));
-        }
-
+        /// <summary>
+        /// Sends some data (string) to the specified URL.
+        /// </summary>
+        /// <param name="url">URL to send data to.</param>
+        /// <param name="data">Data to send (string or JSON string for object).</param>
         public void Send(string url, string data)
         {
             foreach (var item in wsDict)
@@ -117,6 +128,10 @@ namespace BlockchainNetworkP2P.Client
             }
         }
 
+        /// <summary>
+        /// Broadcasts data to all cached websocket endpoints.
+        /// </summary>
+        /// <param name="data">Data to send.</param>
         public void Broadcast(string data)
         {
             foreach (var item in wsDict)
@@ -125,6 +140,10 @@ namespace BlockchainNetworkP2P.Client
             }
         }
 
+        /// <summary>
+        /// Gets a list of all cached P2P servers.
+        /// </summary>
+        /// <returns>Servers that have been connected to.</returns>
         public IList<string> GetServers()
         {
             IList<string> servers = new List<string>();
@@ -135,12 +154,17 @@ namespace BlockchainNetworkP2P.Client
             return servers;
         }
 
+        /// <summary>
+        /// Closes all connections and clears the cached websockets.
+        /// </summary>
         public void Close()
         {
             foreach (var item in wsDict)
             {
                 item.Value.Close();
             }
+
+            wsDict.Clear();
         }
     }
 }

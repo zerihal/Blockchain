@@ -1,5 +1,4 @@
-﻿using BlockchainUtils;
-using BlockchainUtils.Blockchains;
+﻿using BlockchainUtils.Blockchains;
 using BlockchainUtils.Transactions;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -19,8 +18,14 @@ namespace BlockchainNetworkP2P.Server
         private BackgroundWorker _worker = new BackgroundWorker() { WorkerSupportsCancellation = true };
         private ObservableCollection<Transaction> _pendingTransactions = new ObservableCollection<Transaction>();
 
+        /// <summary>
+        /// Server URL.
+        /// </summary>
         public string ServerAddress { get; private set; } = string.Empty;
 
+        /// <summary>
+        /// Socket service URL.
+        /// </summary>
         public string SocketServiceAddress { get; private set; } = string.Empty;
 
         public P2PServer()
@@ -29,6 +34,10 @@ namespace BlockchainNetworkP2P.Server
             _worker.RunWorkerAsync();
         }
 
+        /// <summary>
+        /// Starts the server on the port specified.
+        /// </summary>
+        /// <param name="port">Server port.</param>
         public void Start(int port)
         {
             ServerAddress = $"{_address}:{port}";
@@ -54,6 +63,10 @@ namespace BlockchainNetworkP2P.Server
         /// </summary>
         public void BroadcastTestMessage() => BroadcastMessage(MessageHelper.SerializeMessage(MessageHelper.Test));
 
+        /// <summary>
+        /// Handler for messages received.
+        /// </summary>
+        /// <param name="e">Message arguments.</param>
         protected override void OnMessage(MessageEventArgs e)
         {
             var deserializedMsg = MessageHelper.DeserializeMessage(e.Data, out var msgJsonData);
@@ -80,6 +93,7 @@ namespace BlockchainNetworkP2P.Server
                     break;
 
                 case Transaction transaction:
+                    // Create a pending transactions and all to local queue for background processing.
                     Sandbox.SampleTransactionBlockchain.CreateTransaction(transaction);
                     _pendingTransactions.Add(transaction);
                     break;
@@ -90,16 +104,27 @@ namespace BlockchainNetworkP2P.Server
             Sandbox.ServerMessagesProcessed++;
         }
 
+        /// <summary>
+        /// Handler for new session being opened.
+        /// </summary>
         protected override void OnOpen()
         {
             Console.WriteLine("Websocket session opened");
         }
 
+        /// <summary>
+        /// Handler for session being closed.
+        /// </summary>
+        /// <param name="e">Close event args.</param>
         protected override void OnClose(CloseEventArgs e)
         {
             Console.WriteLine("Websocket session closed");
         }
 
+        /// <summary>
+        /// Broadcasts the specified message (can be JSON string for object or standard string).
+        /// </summary>
+        /// <param name="message">The message to broadcast.</param>
         private void BroadcastMessage(string message)
         {
             if (_wss != null)
@@ -109,6 +134,11 @@ namespace BlockchainNetworkP2P.Server
             }
         }
 
+        /// <summary>
+        /// Background worker handler to process pending transactions that have been added within a separate
+        /// thread to allow the server to continue to receive P2P messages and append the pending transaction
+        /// list as required.
+        /// </summary>
         private void _worker_DoWork(object? sender, DoWorkEventArgs e)
         {
             _pendingTransactions.CollectionChanged += (object ? sender, NotifyCollectionChangedEventArgs e) => 

@@ -7,6 +7,7 @@ namespace BlockchainUtils.Blocks
 {
     public class TransactionBlock : PoWBlock, ITransactionBlock
     {
+        /// <inheritdoc/>
         public IList<Transaction> Transactions { get; set; }
 
         public TransactionBlock(DateTime timeStamp, string? previousHash, IEnumerable<Transaction> transactions) : base(timeStamp, previousHash, string.Empty)
@@ -14,6 +15,7 @@ namespace BlockchainUtils.Blocks
             Transactions = new List<Transaction>(transactions);
         }
 
+        /// <inheritdoc/>
         public override string CalculateHash()
         {
             HashAlgorithm sha = BlockchainSettings.CurrentHash;

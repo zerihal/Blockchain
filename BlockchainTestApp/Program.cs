@@ -1,6 +1,4 @@
-﻿using BlockchainNetworkP2P.Client;
-using BlockchainNetworkP2P.Server;
-using BlockchainTestApp.Interfaces;
+﻿using BlockchainTestApp.Interfaces;
 using BlockchainTestApp.RunTests;
 using BlockchainUtils;
 using BlockchainUtils.Validation;
@@ -46,7 +44,7 @@ namespace BlockchainTestApp
             {
                 case '1':
                     runTest = new BasicHashTest();
-                    runTest.Run([]);
+                    runTest.Run();
 
                     // The blockchain should be valid at this point so confirm that now
                     if (BlockchainHelper.IsValidBlockchain(runTest.RunTestBlockchain, out _))
@@ -63,22 +61,22 @@ namespace BlockchainTestApp
 
                 case '2':
                     runTest = new PoWTest();
-                    runTest.Run([]);
+                    runTest.Run();
                     break;
 
                 case '3':
                     runTest = new TransactionTest();
-                    runTest.Run([]);
+                    runTest.Run();
                     break;
 
                 case '4':
                     runTest = new CustomTest();
-                    runTest.Run([]);
+                    runTest.Run();
                     break;
 
                 case '5':
                     runTest = new P2PTransactionTest();
-                    runTest.Run([]);
+                    runTest.Run();
 
                     break;
 

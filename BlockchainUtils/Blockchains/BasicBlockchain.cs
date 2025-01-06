@@ -10,8 +10,10 @@ namespace BlockchainUtils.Blockchains
     {
         public BasicBlockchain() : base() { }
 
+        /// <inheritdoc/>
         public override IBlock CreateGenesisBlock() => new BasicBlock(DateTime.Now, null, "{}");
 
+        /// <inheritdoc/>
         public override void AddBlock(IBlock block)
         {
             BasicBlock? latestBlock = GetLatestBlock() as BasicBlock;

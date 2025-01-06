@@ -1,6 +1,5 @@
 ﻿using BlockchainUtils.Blocks;
 using BlockchainUtils.Transactions;
-using Newtonsoft.Json;
 
 namespace BlockchainUtils.Blockchains
 {
@@ -94,10 +93,10 @@ namespace BlockchainUtils.Blockchains
 
             if (latestBlock != null && block is TransactionBlock transBlock)
             {
-                block.Index = latestBlock.Index + 1;
-                block.PreviousHash = latestBlock.Hash;
+                transBlock.Index = latestBlock.Index + 1;
+                transBlock.PreviousHash = latestBlock.Hash;
                 transBlock.Mine(Difficulty);
-                Chain.Add(block);
+                Chain.Add(transBlock);
             }
         }
     }

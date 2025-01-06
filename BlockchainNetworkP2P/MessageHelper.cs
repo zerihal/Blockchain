@@ -1,4 +1,5 @@
 ﻿using BlockchainUtils.Blockchains;
+using BlockchainUtils.Transactions;
 using Newtonsoft.Json;
 
 namespace BlockchainNetworkP2P
@@ -8,6 +9,7 @@ namespace BlockchainNetworkP2P
         public const string ClientHello = "Hello Client";
         public const string ServerHello = "Hello Server";
         public const string Test = "Test Message";
+        public const string NewPendingTransactions = "New Pending Transactions";
 
         public static string SerializeMessage(object data)
         {
@@ -44,6 +46,8 @@ namespace BlockchainNetworkP2P
                         return msgJsonData;
                     else if (type == typeof(TransactionBlockchain))
                         return JsonConvert.DeserializeObject<TransactionBlockchain>(msgJsonData, Sandbox.JsonSettings);
+                    else if (type == typeof(Transaction))
+                        return JsonConvert.DeserializeObject<Transaction>(msgJsonData, Sandbox.JsonSettings);
                     else
                         return JsonConvert.DeserializeObject(msgJsonData, Sandbox.JsonSettings);
                 }

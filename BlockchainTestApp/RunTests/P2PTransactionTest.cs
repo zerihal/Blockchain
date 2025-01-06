@@ -1,6 +1,8 @@
 ﻿using BlockchainNetworkP2P;
 using BlockchainNetworkP2P.Client;
 using BlockchainNetworkP2P.Server;
+using BlockchainUtils.Blockchains;
+using Newtonsoft.Json;
 
 namespace BlockchainTestApp.RunTests
 {
@@ -24,53 +26,88 @@ namespace BlockchainTestApp.RunTests
             Console.WriteLine("Creating P2P server and clients");
 
             _server = new P2PServer();
-            _clients = new List<P2PClient>() { new P2PClient("Client1") };
+            _clients = new List<P2PClient>() { new P2PClient("Client1"), new P2PClient("Client2") };
 
-            Console.WriteLine("Running blockchain synchronisation test");
+            Console.WriteLine("Running blockchain synchronization test with 2 transactions from Client1 to Client2 with Server to process");
 
             // Start the server
             _server.Start(8080);
 
-            // Reset processed message count before starting the test monitor (4 messages will be processed for this test to be completed)
-            Sandbox.P2PMessagesProcessedCount = 0;
+            // Reset processed message count before starting the test monitor (12 messages will be processed for this test to be completed)
+            ResetProcessedMessages();
             _ = RunP2PTest();
-            TestMonitor(4).Wait();
+            TestMonitor(12).Wait();
 
             Console.WriteLine("Testing P2P broadcast with 2 clients");
 
             // Reset processed message count before starting the test monitor (2 messages will be processed for this test to be completed)
-            Sandbox.P2PMessagesProcessedCount = 0;
+            ResetProcessedMessages();
             _ = RunBroadcastTest();
             TestMonitor(2).Wait();
 
-            // ToDo - test to create and process some transactions between the clients / server ...
+            // Update the balance of the server for the transactions that it has processed
+            Sandbox.SampleTransactionBlockchain.ProcessPendingTransactions("Server");
 
-            // Cleanup - stop the server, which will close the client connections
-            _server.Stop();
+            Console.WriteLine($"Balance for Client1: {Sandbox.SampleTransactionBlockchain.GetBalance("Client1")}");
+            Console.WriteLine($"Balance for Client2: {Sandbox.SampleTransactionBlockchain.GetBalance("Client2")}");
+            Console.WriteLine($"Balance for Server: {Sandbox.SampleTransactionBlockchain.GetBalance("Server")}");
+
+            // Cleanup - stop the server, which will close the client connections, and reset sample blockchain
+            Cleanup();
 
             Console.WriteLine("\n");
         }
 
         private async Task RunP2PTest()
         {
-            _clients.First().Connect(_server.SocketServiceAddress);
+            // Connect and sync the P2P clients and server
+            _clients[0].Connect(_server.SocketServiceAddress);
+            _clients[1].Connect(_server.SocketServiceAddress);
+
+            // Wait a couple of seconds for clients and server to sync so console output is in a tidy order
+            await Task.Delay(2000);
+
+            // Send a couple of transactions from Client1 to Client2
+            _clients.First().AddTransaction("Client2", 5);
+            _clients.First().AddTransaction("Client2", 10);
 
             await Task.CompletedTask;
         }
 
         private async Task RunBroadcastTest()
         {
-            // Create and connect another client, but do not send sync messages
-            _clients.Add(new P2PClient("Client2"));
-            _clients[1].Connect(_server.SocketServiceAddress, false);
             _server.BroadcastTestMessage();
             await Task.CompletedTask;
         }
 
         private async Task TestMonitor(int awaitMsgCount)
         {
-            while (Sandbox.P2PMessagesProcessedCount < awaitMsgCount)
+            while (GetProcessedMessages() < awaitMsgCount)
                 await Task.Delay(10);
+        }
+
+        private int GetProcessedMessages()
+        {
+            var processedMessages = Sandbox.ServerMessagesProcessed;
+
+            foreach (var client in _clients)
+                processedMessages += client.MessagesProcessed;
+
+            return processedMessages;
+        }
+
+        private void ResetProcessedMessages()
+        {
+            Sandbox.ServerMessagesProcessed = 0;
+
+            foreach (var client in _clients)
+                client.MessagesProcessed = 0;
+        }
+
+        private void Cleanup()
+        {
+            _server.Stop();
+            Sandbox.SampleTransactionBlockchain = new TransactionBlockchain(true);
         }
     }
 }

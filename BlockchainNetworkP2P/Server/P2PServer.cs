@@ -1,6 +1,9 @@
 ﻿using BlockchainUtils;
 using BlockchainUtils.Blockchains;
 using BlockchainUtils.Transactions;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using WebSocketSharp;
 using WebSocketSharp.Server;
 
@@ -10,12 +13,21 @@ namespace BlockchainNetworkP2P.Server
     {
         private const string _address = "ws://localhost";
         private const string _socketService = "/Blockchain";
-        private WebSocketServer? _wss = null;
+        private static WebSocketServer? _wss;
         private bool _chainSynced = false;
+        private BlockchainUtils _utils = new BlockchainUtils();
+        private BackgroundWorker _worker = new BackgroundWorker() { WorkerSupportsCancellation = true };
+        private ObservableCollection<Transaction> _pendingTransactions = new ObservableCollection<Transaction>();
 
         public string ServerAddress { get; private set; } = string.Empty;
 
         public string SocketServiceAddress { get; private set; } = string.Empty;
+
+        public P2PServer()
+        {
+            _worker.DoWork += _worker_DoWork;
+            _worker.RunWorkerAsync();
+        }
 
         public void Start(int port)
         {
@@ -31,19 +43,16 @@ namespace BlockchainNetworkP2P.Server
         /// <summary>
         /// Stop the server and all incoming requests and closes all connections.
         /// </summary>
-        public void Stop() => _wss?.Stop(CloseStatusCode.Normal, "Server stopped");
+        public void Stop()
+        {
+            _wss?.Stop(CloseStatusCode.Normal, "Server stopped");
+            _wss = null;
+        }
 
         /// <summary>
         /// Broadcast a test message to all clients.
         /// </summary>
-        public void BroadcastTestMessage()
-        {
-            if (_wss != null)
-            {
-                foreach (var host in _wss.WebSocketServices.Hosts)
-                    host.Sessions.Broadcast(MessageHelper.SerializeMessage(MessageHelper.Test));
-            }
-        }
+        public void BroadcastTestMessage() => BroadcastMessage(MessageHelper.SerializeMessage(MessageHelper.Test));
 
         protected override void OnMessage(MessageEventArgs e)
         {
@@ -59,18 +68,7 @@ namespace BlockchainNetworkP2P.Server
                     break;
 
                 case TransactionBlockchain tBlockchain:
-                    // If the blockchain that has been received is valid and has more blocks than the sample one, update
-                    // the sample blockchain.
-                    if (tBlockchain != null && BlockchainHelper.IsValidBlockchain(tBlockchain, out _) &&
-                        tBlockchain.Chain.Count > Sandbox.SampleTransactionBlockchain.Chain.Count)
-                    {
-                        var newTransactions = new List<Transaction>();
-                        newTransactions.AddRange(tBlockchain.PendingTransactions);
-                        newTransactions.AddRange(Sandbox.SampleTransactionBlockchain.PendingTransactions);
-
-                        tBlockchain.PendingTransactions = newTransactions;
-                        Sandbox.SampleTransactionBlockchain = tBlockchain;
-                    }
+                    _utils.UpdateSampleBlockchain(tBlockchain);
 
                     if (!_chainSynced)
                     {
@@ -80,9 +78,16 @@ namespace BlockchainNetworkP2P.Server
                     }
 
                     break;
+
+                case Transaction transaction:
+                    Sandbox.SampleTransactionBlockchain.CreateTransaction(transaction);
+                    _pendingTransactions.Add(transaction);
+                    break;
             }
 
-            Sandbox.P2PMessagesProcessedCount++;
+            // Needs to update a static variable for server messages due to potential for multiple sessions for this
+            // instance of server.
+            Sandbox.ServerMessagesProcessed++;
         }
 
         protected override void OnOpen()
@@ -93,6 +98,31 @@ namespace BlockchainNetworkP2P.Server
         protected override void OnClose(CloseEventArgs e)
         {
             Console.WriteLine("Websocket session closed");
+        }
+
+        private void BroadcastMessage(string message)
+        {
+            if (_wss != null)
+            {
+                foreach (var host in _wss.WebSocketServices.Hosts)
+                    host.Sessions.Broadcast(message);
+            }
+        }
+
+        private void _worker_DoWork(object? sender, DoWorkEventArgs e)
+        {
+            _pendingTransactions.CollectionChanged += (object ? sender, NotifyCollectionChangedEventArgs e) => 
+            {
+                if (e.Action == NotifyCollectionChangedAction.Add)
+                {
+                    Sandbox.SampleTransactionBlockchain.ProcessPendingTransactions("Server");
+
+                    if (e.NewItems?.Cast<Transaction>().FirstOrDefault() is Transaction transaction)
+                        _pendingTransactions.Remove(transaction);
+
+                    Send(MessageHelper.SerializeMessage("Transaction processed"));
+                }
+            };
         }
     }
 }

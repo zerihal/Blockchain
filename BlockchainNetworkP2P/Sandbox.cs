@@ -1,4 +1,6 @@
-﻿using BlockchainUtils.Blockchains;
+﻿using BlockchainUtils;
+using BlockchainUtils.Blockchains;
+using BlockchainUtils.Transactions;
 using Newtonsoft.Json;
 
 namespace BlockchainNetworkP2P
@@ -7,7 +9,7 @@ namespace BlockchainNetworkP2P
     {
         public static TransactionBlockchain SampleTransactionBlockchain { get; set; } = new TransactionBlockchain(true);
 
-        public static int P2PMessagesProcessedCount { get; set; }
+        public static int ServerMessagesProcessed { get; set; }
 
         public static JsonSerializerSettings JsonSettings => new JsonSerializerSettings() 
         { 

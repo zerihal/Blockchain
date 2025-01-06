@@ -11,8 +11,11 @@ namespace BlockchainNetworkP2P.Client
     public class P2PClient
     {
         private IDictionary<string, WebSocket> wsDict = new Dictionary<string, WebSocket>();
+        private BlockchainUtils utils = new BlockchainUtils();
 
         public string ClientName { get; }
+
+        public int MessagesProcessed { get; set; }
 
         public P2PClient(string clientName)
         {
@@ -33,27 +36,22 @@ namespace BlockchainNetworkP2P.Client
                     {
                         case string str:
                             Console.WriteLine($"{ClientName} received message {str}");
+                            
                             if (str == MessageHelper.ClientHello)
                                 ws.Send(MessageHelper.SerializeMessage(Sandbox.SampleTransactionBlockchain));
+                            
+                            if (str == MessageHelper.NewPendingTransactions)
+                                Sandbox.SampleTransactionBlockchain.ProcessPendingTransactions(ClientName);
+
                             break;
 
                         case TransactionBlockchain tBlockchain:
-                            // If the blockchain that has been received is valid and has more blocks than the sample one, update
-                            // the sample blockchain.
-                            if (tBlockchain != null && BlockchainHelper.IsValidBlockchain(tBlockchain, out _) &&
-                                tBlockchain.Chain.Count > Sandbox.SampleTransactionBlockchain.Chain.Count)
-                            {
-                                var newTransactions = new List<Transaction>();
-                                newTransactions.AddRange(tBlockchain.PendingTransactions);
-                                newTransactions.AddRange(Sandbox.SampleTransactionBlockchain.PendingTransactions);
-
-                                tBlockchain.PendingTransactions = newTransactions;
-                                Sandbox.SampleTransactionBlockchain = tBlockchain;
-                            }
+                            utils.UpdateSampleBlockchain(tBlockchain);
+                            Console.WriteLine($"Client synced");
                             break;
                     }
 
-                    Sandbox.P2PMessagesProcessedCount++;
+                    MessagesProcessed++;
                 };
 
                 ws.OnOpen += (sender, e) =>
